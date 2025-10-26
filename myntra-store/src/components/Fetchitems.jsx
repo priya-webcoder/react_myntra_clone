@@ -13,18 +13,22 @@ const FetchItems = () => {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    // ✅ Check if environment variable is working
-    console.log("API URL:", import.meta.env.VITE_API_URL);
-
+    // ✅ Log API URL at build time (only works inside React code)
+    console.log("API URL (build time):", process.env.REACT_APP_API_URL);
 
     dispatch(fetchStatusActions.markFetchingStarted());
 
-    fetch(`${import.meta.env.VITE_API_URL}/items`, { signal })
-      .then((res) => res.json())
+    fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then(({ items }) => {
         dispatch(fetchStatusActions.markFetchDone());
         dispatch(fetchStatusActions.markFetchingFinished());
-        dispatch(itemsActions.addInitialItems(items)); // send all items, not items[0]
+        dispatch(itemsActions.addInitialItems(items)); // send all items
       })
       .catch((err) => {
         if (err.name === "AbortError") {
@@ -39,7 +43,7 @@ const FetchItems = () => {
     };
   }, [fetchStatus, dispatch]);
 
-  return <></>;
+  return null;
 };
 
 export default FetchItems;
