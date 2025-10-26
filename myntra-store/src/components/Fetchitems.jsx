@@ -1,19 +1,34 @@
-useEffect(() => {
-  if (fetchStatus.fetchDone) return;
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { itemsActions } from "../store/itemsSlice";
+import { fetchStatusActions } from "../store/fetchStatusSlice";
 
-  const controller = new AbortController();
-  const signal = controller.signal;
+const FetchItems = () => {
+  const fetchStatus = useSelector((store) => store.fetchStatus);
+  const dispatch = useDispatch();
 
-  dispatch(fetchStatusActions.markFetchingStarted());
-  fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
-    .then((res) => res.json())
-    .then(({ items }) => {
-      dispatch(fetchStatusActions.markFetchDone());
-      dispatch(fetchStatusActions.markFetchingFinished());
-      dispatch(itemsActions.addInitialItems(items));
-    });
+  useEffect(() => {
+    if (fetchStatus.fetchDone) return;
 
-  return () => {
-    controller.abort();
-  };
-}, [fetchStatus]);
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    dispatch(fetchStatusActions.markFetchingStarted());
+
+    fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
+      .then((res) => res.json())
+      .then(({ items }) => {
+        dispatch(fetchStatusActions.markFetchDone());
+        dispatch(fetchStatusActions.markFetchingFinished());
+        dispatch(itemsActions.addInitialItems(items)); // ✅ corrected
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [fetchStatus]);
+
+  return <></>;
+};
+
+export default FetchItems;
