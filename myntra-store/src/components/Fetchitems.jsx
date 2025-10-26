@@ -18,7 +18,7 @@ const FetchItems = () => {
 
     dispatch(fetchStatusActions.markFetchingStarted());
 
-    fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
+    fetch(`${import.meta.env.VITE_API_URL}/items`, { signal })
       .then((res) => res.json())
       .then(({ items }) => {
         dispatch(fetchStatusActions.markFetchDone());
