@@ -14,7 +14,7 @@ const FetchItems = () => {
     const signal = controller.signal;
 
     // ✅ Check if environment variable is working
-    console.log("API URL:", process.env.REACT_APP_API_URL);
+    console.log("API URL:", meta.env.VITE_API_URL);
 
     dispatch(fetchStatusActions.markFetchingStarted());
 
