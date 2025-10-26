@@ -13,6 +13,9 @@ const FetchItems = () => {
     const controller = new AbortController();
     const signal = controller.signal;
 
+    // ✅ Check if environment variable is working
+    console.log("API URL:", process.env.REACT_APP_API_URL);
+
     dispatch(fetchStatusActions.markFetchingStarted());
 
     fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
@@ -20,13 +23,20 @@ const FetchItems = () => {
       .then(({ items }) => {
         dispatch(fetchStatusActions.markFetchDone());
         dispatch(fetchStatusActions.markFetchingFinished());
-        dispatch(itemsActions.addInitialItems(items)); // ✅ corrected
+        dispatch(itemsActions.addInitialItems(items)); // send all items, not items[0]
+      })
+      .catch((err) => {
+        if (err.name === "AbortError") {
+          console.log("Fetch aborted");
+        } else {
+          console.error("Fetch error:", err);
+        }
       });
 
     return () => {
       controller.abort();
     };
-  }, [fetchStatus]);
+  }, [fetchStatus, dispatch]);
 
   return <></>;
 };
