@@ -1,34 +1,19 @@
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { itemsActions } from "../store/itemsSlice";
-import { fetchStatusActions } from "../store/fetchStatusSlice";
+useEffect(() => {
+  if (fetchStatus.fetchDone) return;
 
-const FetchItems = () => {
-  const fetchStatus = useSelector((store) => store.fetchStatus);
-  const dispatch = useDispatch();
+  const controller = new AbortController();
+  const signal = controller.signal;
 
-  useEffect(() => {
-    if (fetchStatus.fetchDone) return;
+  dispatch(fetchStatusActions.markFetchingStarted());
+  fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
+    .then((res) => res.json())
+    .then(({ items }) => {
+      dispatch(fetchStatusActions.markFetchDone());
+      dispatch(fetchStatusActions.markFetchingFinished());
+      dispatch(itemsActions.addInitialItems(items));
+    });
 
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    dispatch(fetchStatusActions.markFetchingStarted());
-
-    fetch(`${process.env.REACT_APP_API_URL}/items`, { signal })
-      .then((res) => res.json())
-      .then(({ items }) => {
-        dispatch(fetchStatusActions.markFetchDone());
-        dispatch(fetchStatusActions.markFetchingFinished());
-        dispatch(itemsActions.addInitialItems(items[0]));
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [fetchStatus]);
-
-  return <></>;
-};
-
-export default FetchItems;
+  return () => {
+    controller.abort();
+  };
+}, [fetchStatus]);
